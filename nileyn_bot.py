@@ -17,8 +17,7 @@ fasalo = ["Fasalka 3aad", "Fasalka 4aad", "Fasalka 5aad"]
 def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.row("👨‍🎓 Arday", "👨‍🏫 Macalin")
-    bot.send_message(message.chat.id, "👋 Ku soo dhawoow Nileyn Primary and Secondary School!
-Fadlan dooro doorkaaga:", reply_markup=markup)
+    bot.send_message(message.chat.id, "👋 Ku soo dhawoow Nileyn Primary and Secondary School!\nFadlan dooro doorkaaga:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "👨‍🎓 Arday")
 def ask_full_name(message):
@@ -77,14 +76,9 @@ def finish_registration(message):
     chat_id = message.chat.id
     user_data[chat_id]["reason"] = message.text
 
-    summary = "
-".join(f"{key}: {value}" for key, value in user_data[chat_id].items())
+    summary = "\n".join(f"{key}: {value}" for key, value in user_data[chat_id].items())
     bot.send_message(chat_id, "✅ Waad is diiwaangelisay. Mahadsanid!")
-    bot.send_message(ADMIN_ID, f"🆕 Arday cusub ayaa is diiwaangeliyay:
-
-{summary}
-
-ID: {chat_id}")
+    bot.send_message(ADMIN_ID, f"🆕 Arday cusub ayaa is diiwaangeliyay:\n\n{summary}\n\nID: {chat_id}")
 
 @bot.message_handler(func=lambda message: message.text == "👨‍🏫 Macalin")
 def teacher_login(message):
@@ -95,8 +89,7 @@ def teacher_login(message):
 def check_username(message):
     chat_id = message.chat.id
     if message.text == USERNAME:
-        bot.send_message(chat_id, "✅ Username wuu saxnaa.
-Hadda geli *password*:", parse_mode="Markdown")
+        bot.send_message(chat_id, "✅ Username wuu saxnaa.\nHadda geli *password*:", parse_mode="Markdown")
         bot.register_next_step_handler(message, check_password)
     else:
         bot.send_message(chat_id, "❌ Username-ka waa khaldan. Dib isku day.")
@@ -117,10 +110,7 @@ def show_students(chat_id):
         bot.send_message(chat_id, "❌ Weli ma jiraan arday is diiwaangeliyay.")
     else:
         for id, data in user_data.items():
-            summary = "
-".join(f"{key}: {value}" for key, value in data.items())
-            bot.send_message(chat_id, f"👨‍🎓 Arday:
-{summary}
-ID: {id}")
+            summary = "\n".join(f"{key}: {value}" for key, value in data.items())
+            bot.send_message(chat_id, f"👨‍🎓 Arday:\n{summary}\nID: {id}")
 
 bot.polling()
