@@ -3,7 +3,7 @@ import telebot
 from telebot import types
 
 TOKEN = "7761830641:AAG3k2XOzH2Y-M4TczT_0z7CKuBqraEjKo8"
-ADMIN_ID = 5538763128
+ADMIN_ID = 5538763128  # Fixed admin ID
 USERNAME = "macalinnileyn"
 PASSWORD = "1234"
 
@@ -16,23 +16,44 @@ fasalo = ["Fasalka 3aad", "Fasalka 4aad", "Fasalka 5aad"]
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    chat_id = message.chat.id
+    if not hasattr(bot, 'first_user_set'):
+        bot.admin_id = ADMIN_ID
+        bot.first_user_set = True
+
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.row("👨‍🎓 Arday", "👨‍🏫 Macalin")
-    bot.send_message(
-        message.chat.id,
-        "🏫 Soo Dhaweyn Qurux Badan oo Rasmi ah\n"
-        "Ku soo dhawoow madasha rasmiga ah ee Nileyn Primary and Secondary!\n"
-        "Waxaad joogtaa meel ay ka curato aqoonta, anshaxa iyo horumarka ardayga Soomaaliyeed.\n\n"
-        "Botkan waxaa si gaar ah loogu sameeyay fududeynta adeegyada dugsiga sida:\n"
-        "✅ Wargelinta macallimiinta iyo ardayda\n"
-        "✅ Jadwalka fasallada\n"
-        "✅ Ogeysiisyada imtixaanka iyo xafladaha\n"
-        "✅ Diiwaangelinta iyo xog uruurinta\n\n"
-        "👨‍🏫 Maamulka guud: Mudane Shaaciye\n"
-        "Hoggaan firfircoon oo u taagan tayada waxbarasho iyo daryeelka jiilka berri.\n\n"
-        "💡 Nileyn waa hoyga waxbarasho tayo leh, mustaqbal ifaya!"
+    welcome_msg = (
+        "🏫 Soo Dhaweyn Qurux Badan oo Rasmi ah
+"
+        "Ku soo dhawoow madasha rasmiga ah ee Nileyn Primary and Secondary!
+"
+        "Waxaad joogtaa meel ay ka curato aqoonta, anshaxa iyo horumarka ardayga Soomaaliyeed.
+
+"
+        "Botkan waxaa si gaar ah loogu sameeyay fududeynta adeegyada dugsiga sida:
+
+"
+        "✅ Wargelinta macallimiinta iyo ardayda
+"
+        "✅ Jadwalka fasallada
+"
+        "✅ Ogeysiisyada imtixaanka iyo xafladaha
+"
+        "✅ Diiwaangelinta iyo xog uruurinta
+
+"
+        "👨‍🏫 Maamulka guud: Mudane Shaaciye
+"
+        "Hoggaan firfircoon oo u taagan tayada waxbarasho iyo daryeelka jiilka berri.
+
+"
+        "💡 Nileyn waa hoyga waxbarasho tayo leh, mustaqbal ifaya!
+
+"
+        "Fadlan dooro doorkaaga:"
     )
-    bot.send_message(message.chat.id, "Fadlan dooro doorkaaga:", reply_markup=markup)
+    bot.send_message(chat_id, welcome_msg, reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "👨‍🎓 Arday")
 def ask_full_name(message):
@@ -92,40 +113,28 @@ def finish_registration(message):
     user_data[chat_id]["reason"] = message.text
 
     summary = "\n".join(f"{key}: {value}" for key, value in user_data[chat_id].items())
-    bot.send_message(chat_id, "✅ Waad is diiwaangelisay. Mahadsanid!")
+    bot.send_message(chat_id, "✅ Mahadsanid, waxaad isdiiwaangelisay sidii loo baahnaa. Waxaan kugu shaqayn doonaa si hufan!")
     bot.send_message(ADMIN_ID, f"🆕 Arday cusub ayaa is diiwaangeliyay:\n\n{summary}\n\nID: {chat_id}")
 
 @bot.message_handler(func=lambda message: message.text == "👨‍🏫 Macalin")
 def teacher_login(message):
     chat_id = message.chat.id
-    bot.send_message(chat_id, "👨‍🏫 Geli *username*:", parse_mode="Markdown")
-    bot.register_next_step_handler(message, check_username)
+    user_data[chat_id] = {}
+    bot.send_message(chat_id, "👨‍🏫 Magacaaga:")
+    bot.register_next_step_handler(message, ask_teacher_subjects)
 
-def check_username(message):
+def ask_teacher_subjects(message):
     chat_id = message.chat.id
-    if message.text == USERNAME:
-        bot.send_message(chat_id, "✅ Username wuu saxnaa.\nHadda geli *password*:", parse_mode="Markdown")
-        bot.register_next_step_handler(message, check_password)
-    else:
-        bot.send_message(chat_id, "❌ Username-ka waa khaldan. Dib isku day.")
-        start(message)
+    user_data[chat_id]["teacher_name"] = message.text
+    bot.send_message(chat_id, "📚 Maaddooyinka aad dhigto (mid ama labo):")
+    bot.register_next_step_handler(message, finish_teacher_login)
 
-def check_password(message):
+def finish_teacher_login(message):
     chat_id = message.chat.id
-    if message.text == PASSWORD:
-        teacher_logged_in[chat_id] = True
-        bot.send_message(chat_id, "✅ Waad gashay. Ku soo dhawoow maamulka.")
-        show_students(chat_id)
-    else:
-        bot.send_message(chat_id, "❌ Password-ka waa khaldan.")
-        start(message)
+    user_data[chat_id]["subjects"] = message.text
 
-def show_students(chat_id):
-    if not user_data:
-        bot.send_message(chat_id, "❌ Weli ma jiraan arday is diiwaangeliyay.")
-    else:
-        for id, data in user_data.items():
-            summary = "\n".join(f"{key}: {value}" for key, value in data.items())
-            bot.send_message(chat_id, f"👨‍🎓 Arday:\n{summary}\nID: {id}")
+    summary = "\n".join(f"{key}: {value}" for key, value in user_data[chat_id].items())
+    bot.send_message(chat_id, "✅ Macalinku wuu isdiiwaangeliyay. Mahadsanid!")
+    bot.send_message(ADMIN_ID, f"👨‍🏫 Macalin cusub ayaa is diiwaangeliyay:\n\n{summary}\n\nID: {chat_id}")
 
 bot.polling()
