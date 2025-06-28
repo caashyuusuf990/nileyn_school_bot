@@ -60,7 +60,7 @@ def teacher_username(message):
     if message.text.strip() == TEACHER_USERNAME:
         user_states[chat_id] = "login_password"
 bot.send_message(chat_id, "✅ Username wuu saxnaa.\nHadda geli *password*:", parse_mode="Markdown")
-Hadda geli *password*:", parse_mode="Markdown")
+bot.send_message(chat_id, "✅ Username wuu saxnaa.\nHadda geli *password*:", parse_mode="Markdown")
     else:
         bot.send_message(chat_id, "❌ Username-ka waa khaldan. Dib u qor.")
 
